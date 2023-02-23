@@ -1,0 +1,41 @@
+const char* vertexShaderSource = R"(
+    #version 330 core 
+    layout (location = 0) in vec3 Pos;
+
+    uniform mat4 Proj;
+    uniform mat4 View;
+    uniform mat4 Model;
+
+    out vec3 WorldPos;
+
+    void main()
+    {
+        gl_Position  = Proj * View * Model * vec4(Pos,1.0f);
+        WorldPos = (Model * vec4(Pos,1.0f)).xyz;
+    }
+
+)";
+
+const char* fragmentShaderSource = R"(
+    #version 330 core
+    out vec4 Color;
+
+    in vec3 WorldPos;
+    uniform vec3 CameraPos;
+    uniform vec3 ObjColor;
+
+    vec3 fogColor = vec3(1.0,0.2,1.0);
+    float fogStart = -5.0f;
+    float fogEnd =  5.0f;
+
+  
+    void main()
+    {   
+        float distance = length(WorldPos - CameraPos);
+        float fogAmount = (distance- fogStart)/(fogEnd - fogStart);
+        fogAmount = clamp(fogAmount,0.0,1.0);
+        vec4 finalColor = mix(vec4(fogColor,1.0f),vec4(ObjColor,1.0f),fogAmount);
+   
+        Color = vec4(finalColor);
+    };
+)";
